@@ -9,9 +9,14 @@ const rateLimit = require('express-rate-limit');
 require('dotenv').config(); // Load environment variables early
 
 const app = express();
+app.set('trust proxy', 1); // <-- 🔥 Add this line
 
 // --- Middleware ---
-const allowedOrigins = ('https://directory-b3r2.onrender.com' || 'http://localhost:3000,http://localhost:5173').split(',');
+const allowedOrigins = [
+  'https://jovial-snickerdoodle-7f8d91.netlify.app',
+  'http://localhost:3000',
+  'http://localhost:5173'
+];
 
 app.use(
   cors({
