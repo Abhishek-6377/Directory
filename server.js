@@ -11,7 +11,7 @@ require('dotenv').config(); // Load environment variables early
 const app = express();
 
 // --- Middleware ---
-const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000,http://localhost:5173').split(',');
+const allowedOrigins = ('https://directory-b3r2.onrender.com' || 'http://localhost:3000,http://localhost:5173').split(',');
 
 app.use(
   cors({
