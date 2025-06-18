@@ -158,12 +158,12 @@ router.post('/use/:code',
       }
 
       const discountPercent = parseFloat(coupon.discount);
-      let discountAmount = (orderAmount * discountPercent) / 100;
-
+      let discountAmount =Math.round((orderAmount * discountPercent) / 100);
+      
       const maxAllowedDiscount = 500;
       discountAmount = Math.min(discountAmount, maxAllowedDiscount);
 
-      const orderAmountAfterDiscount = orderAmount - discountAmount;
+      const orderAmountAfterDiscount = Math.max(0, Math.round(orderAmount - discountAmount));
 
       coupon.usageCount += 1;
       coupon.totalDiscount += discountAmount;
