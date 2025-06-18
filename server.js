@@ -9,7 +9,7 @@ const rateLimit = require('express-rate-limit');
 require('dotenv').config(); // Load environment variables early
 
 const app = express();
-app.set('trust proxy', 1); // <-- 🔥 Add this line
+app.set('trust proxy', 1); // 🔥 For Render and proxies
 
 // --- Middleware ---
 const allowedOrigins = [
@@ -21,7 +21,7 @@ const allowedOrigins = [
 
 app.use(
   cors({
-     origin: function (origin, callback) {
+    origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -32,6 +32,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -88,7 +89,7 @@ app.use('/api', mailRoutes);
 const membershipRoutes = require('./routes/membershipRoutes');
 app.use('/api/membership', membershipRoutes);
 
-const payment = require('./routes/paymentRoutes')
+const payment = require('./routes/paymentRoutes');
 app.use('/api/pay', payment);
 
 // --- Health Check ---
@@ -156,10 +157,15 @@ const gracefulShutdown = (signal) => {
   if (serverInstance) {
     serverInstance.close(() => {
       console.log('🛑 Express server closed.');
-      mongoose.connection.close(false, () => {
-        console.log('🛑 MongoDB connection closed.');
-        process.exit(0);
-      });
+      mongoose.connection.close(false)
+        .then(() => {
+          console.log('🛑 MongoDB connection closed.');
+          process.exit(0);
+        })
+        .catch((err) => {
+          console.error('Error during MongoDB close:', err);
+          process.exit(1);
+        });
     });
   } else {
     process.exit(0);
