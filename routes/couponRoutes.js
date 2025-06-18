@@ -21,7 +21,7 @@ router.post(
   '/create',
   [
     body('amount').isFloat({ gt: 0 }),
-    body('discount').isString().trim().notEmpty(),
+    body('discount').isFloat({ gt: 0, lt: 100 }), // ✅ discount % between 0 and 100
     body('name').optional().isString().trim(),
     body('expiresAt').optional().isISO8601(),
     body('category').optional().isArray(),
@@ -46,7 +46,7 @@ router.post(
         code: formattedCode,
         name: name?.trim(),
         amount,
-        discount: discount.trim(),
+        discount,
         expiresAt: expiresAt ? new Date(expiresAt) : null,
         category: Array.isArray(category) ? category : [],
       });
@@ -128,7 +128,7 @@ router.get(
       if (coupon.expiresAt && Date.now() > coupon.expiresAt.getTime())
         return res.status(400).json({ valid: false, message: 'Coupon expired' });
 
-      res.json({ valid: true, coupon, discountAmount });
+      res.json({ valid: true, coupon });
     } catch (err) {
       console.error('Validation error:', err);
       res.status(500).json({ valid: false, message: err.message || 'Validation server error' });
