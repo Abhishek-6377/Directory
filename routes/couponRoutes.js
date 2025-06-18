@@ -142,6 +142,13 @@ router.post('/use/:code',
   async (req, res) => {
     try {
       const code = req.params.code.toUpperCase().trim();
+      const orderAmount = parseFloat(req.body.orderAmount);
+
+      console.log('USE COUPON:', code, 'OrderAmount:', orderAmount);
+
+      if (isNaN(orderAmount)) {
+        return res.status(400).json({ success: false, message: 'Invalid order amount' });
+      }
 
       const coupon = await Coupon.findOne({ code });
       if (!coupon) return res.status(404).json({ success: false, message: 'Coupon not found' });
@@ -150,14 +157,9 @@ router.post('/use/:code',
         return res.status(400).json({ success: false, message: 'Coupon expired' });
       }
 
-      const orderAmount = parseFloat(coupon.amount);  // 🟢 USE THIS
       const discountPercent = parseFloat(coupon.discount);
+      let discountAmount = (orderAmount * discountPercent) / 100;
 
-      let baseDiscountAmount  = (orderAmount * discountPercent) / 100;
-      let maxDiscount = 20;
-      let discountAmount = (baseDiscountAmount  * maxDiscount) / 100;
-
-      // Cap max discount to ₹500
       const maxAllowedDiscount = 500;
       discountAmount = Math.min(discountAmount, maxAllowedDiscount);
 
@@ -182,8 +184,8 @@ router.post('/use/:code',
       console.error('Use error:', err);
       res.status(500).json({ success: false, message: err.message || 'Server error while using coupon' });
     }
-  });
-
+  }
+);
 
 // === Delete Coupon ===
 router.delete('/:id', [param('id').isMongoId()], handleValidation, async (req, res) => {
